@@ -51,4 +51,5 @@ export interface ProjectionPoint {
   revenue: number;
   costs: number;
   profit: number;
+  month?: number;
 }
