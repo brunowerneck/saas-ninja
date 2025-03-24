@@ -1,10 +1,9 @@
-
 import React, { useMemo, useState } from 'react';
 import { useCalculator } from '@/context/CalculatorContext';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { ProjectionPoint } from '@/types/calculator';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Input } from '@/components/ui/input';
 
 const ProjectionsTab: React.FC = () => {
@@ -92,6 +91,23 @@ const ProjectionsTab: React.FC = () => {
     }
   };
 
+  // Custom tooltip content component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-black/90 p-3 rounded-lg shadow-lg border border-gray-700">
+          <p className="text-white font-medium mb-1">{`${label} assinantes`}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={`item-${index}`} className="text-sm" style={{ color: entry.color }}>
+              {`${entry.name}: ${formatCurrency(entry.value)}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-app-card border border-app-border rounded-lg p-5 animate-fade-in">
       <h2 className="text-xl font-semibold mb-1">Projeções Financeiras</h2>
@@ -130,30 +146,7 @@ const ProjectionsTab: React.FC = () => {
                 tickFormatter={(value) => formatCurrency(value, 'BRL').split(' ')[0]}
                 label={{ value: 'Valor (BRL)', angle: -90, position: 'insideLeft' }}
               />
-              <ChartTooltip 
-                content={({active, payload}) => (
-                  <ChartTooltipContent 
-                    active={active}
-                    payload={payload}
-                    formatter={(value, name) => {
-                      if (name === 'revenue') return ['Receita', formatCurrency(value as number)];
-                      if (name === 'costs') return ['Custos', formatCurrency(value as number)];
-                      if (name === 'profit') return ['Lucro', formatCurrency(value as number)];
-                      return [name, value];
-                    }}
-                    labelFormatter={(label) => `${label} assinantes`}
-                    style={{
-                      backgroundColor: 'black',
-                      borderRadius: '8px',
-                      color: 'white',
-                      padding: '10px',
-                      fontSize: '14px',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                    }}
-
-                  />
-                )}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Line 
                 type="monotone" 
                 dataKey="revenue" 
