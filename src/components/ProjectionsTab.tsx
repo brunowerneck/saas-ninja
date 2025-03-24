@@ -110,7 +110,7 @@ const ProjectionsTab: React.FC = () => {
           max="20"
           value={projectionSize}
           onChange={(e) => setProjectionSize(Math.max(2, Math.min(20, Number(e.target.value))))}
-          className="w-full max-w-xs text-slate-900"
+          className="w-full max-w-xs text-slate-900 bg-white/20"
         />
       </div>
       
