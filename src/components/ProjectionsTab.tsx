@@ -8,7 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Lege
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { TrendingUp, AlertCircle } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 const ProjectionsTab: React.FC = () => {
   const { state, results } = useCalculator();
@@ -26,7 +26,7 @@ const ProjectionsTab: React.FC = () => {
 
     const breakEvenUsers = results.breakEvenUsers;
     const points: ProjectionPoint[] = [];
-    const milestones = [100, 500, 1000, 2500, 5000, 10_000, 20_000, 50_000, 100_000];
+    const milestones = [100, 200, 300, 400, 500, 1000, 5000, 10_000, 50_000, 100_000];
     const milestonePoints: ProjectionPoint[] = [];
     
     // Calculate how many months to reach break-even
@@ -110,22 +110,6 @@ const ProjectionsTab: React.FC = () => {
       profit
     };
   }
-
-  // Calculate the 40% rule benchmark for each milestone
-  const fortyPercentRuleAnalysis = useMemo(() => {
-    return projections.milestonePoints.map(point => {
-      const annualRevenue = point.revenue * 12;
-      const costPercentage = (point.costs / point.revenue) * 100;
-      const isCompliant = costPercentage <= 40;
-      
-      return {
-        users: point.users,
-        annualRevenue,
-        costPercentage,
-        isCompliant
-      };
-    });
-  }, [projections.milestonePoints]);
 
   const chartConfig = {
     revenue: {
@@ -337,55 +321,6 @@ const ProjectionsTab: React.FC = () => {
                 <Legend />
               </LineChart>
             </ChartContainer>
-          </div>
-          
-          {/* 40% Rule Analysis */}
-          <div className="mt-8 space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-amber-500" />
-              <span>Regra dos 40% - Análise</span>
-            </h3>
-            <div className="bg-app-dark/50 p-4 rounded-lg mb-4">
-              <p className="text-sm text-white/80">
-                A Regra dos 40% é uma métrica usada por investidores para avaliar o desempenho de SaaS. 
-                Ela sugere que a soma dos custos não deve ultrapassar 40% da receita. Uma empresa saudável 
-                mantém seus custos totais abaixo de 40% de sua receita.
-              </p>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assinantes</TableHead>
-                  <TableHead>Receita Anual</TableHead>
-                  <TableHead>Custos (% da Receita)</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fortyPercentRuleAnalysis.map((point, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{point.users}</TableCell>
-                    <TableCell>{formatCurrency(point.annualRevenue)}</TableCell>
-                    <TableCell>{point.costPercentage.toFixed(1)}%</TableCell>
-                    <TableCell>
-                      <div className={`flex items-center gap-1 ${point.isCompliant ? 'text-success' : 'text-red-500'}`}>
-                        {point.isCompliant ? (
-                          <>
-                            <div className="h-2 w-2 rounded-full bg-success"></div>
-                            <span>Saudável</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                            <span>Acima do recomendado</span>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </div>
           
           <div className="mt-8 space-y-4">
