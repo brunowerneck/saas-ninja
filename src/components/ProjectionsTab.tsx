@@ -18,7 +18,7 @@ const ProjectionsTab: React.FC = () => {
 
     const points: ProjectionPoint[] = [];
     const breakEven = results.breakEvenUsers;
-    const step = Math.max(1, Math.ceil(breakEven / 1));
+    const step = Math.max(1, Math.ceil(breakEven));
     
     // Calculate projection points
     for (let i = 0; i < projectionSize; i++) {
@@ -110,7 +110,7 @@ const ProjectionsTab: React.FC = () => {
           max="20"
           value={projectionSize}
           onChange={(e) => setProjectionSize(Math.max(2, Math.min(20, Number(e.target.value))))}
-          className="w-full max-w-xs text-white bg-app-card"
+          className="max-w-xs text-white bg-app-card"
         />
       </div>
       
