@@ -26,7 +26,7 @@ const ProjectionsTab: React.FC = () => {
 
     const breakEvenUsers = results.breakEvenUsers;
     const points: ProjectionPoint[] = [];
-    const milestones = [100, 500, 1000, 2500, 5000, 10_000, 20_000, 50_000, 100_000];
+    const milestones = [100, 200, 300, 400, 500, 1000, 5000, 10_000, 50_000, 100_000];
     const milestonePoints: ProjectionPoint[] = [];
     
     // Calculate how many months to reach break-even
