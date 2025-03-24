@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -96,6 +90,61 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-app-dark text-white;
+  }
+
+  input:focus-visible {
+    @apply outline-none ring-1 ring-white/30;
+  }
+}
+
+@layer components {
+  .tab-button {
+    @apply relative px-4 py-2 text-sm font-medium text-white/60 transition-colors 
+           hover:text-white focus:outline-none;
+  }
+
+  .tab-button.active {
+    @apply text-white;
+  }
+
+  .tab-button.active::after {
+    content: "";
+    @apply absolute bottom-0 left-0 h-0.5 w-full bg-white;
+  }
+
+  .form-input {
+    @apply bg-black/20 border-app-border rounded-md px-3 py-2 w-full 
+           focus:outline-none focus:ring-1 focus:ring-white/30
+           transition duration-200;
+  }
+
+  .cost-item {
+    @apply flex items-center gap-3 mb-3 animate-slide-in;
+  }
+
+  .currency-select {
+    @apply bg-black/20 border border-app-border rounded-md px-3 py-2
+           focus:outline-none focus:ring-1 focus:ring-white/30
+           transition duration-200;
+  }
+
+  .add-button {
+    @apply flex items-center justify-center w-full py-2 mt-2
+           border border-app-border rounded-md
+           text-white/70 hover:text-white hover:bg-white/5
+           transition duration-200;
+  }
+
+  .delete-button {
+    @apply p-1.5 hover:bg-white/10 rounded-md transition duration-200;
+  }
+
+  .info-icon {
+    @apply text-white/40 hover:text-white cursor-pointer transition duration-200;
+  }
+
+  .result-card {
+    @apply bg-app-card border border-app-border rounded-lg p-5 mb-5;
   }
 }
