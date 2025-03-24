@@ -293,7 +293,7 @@ const ProjectionsTab: React.FC = () => {
                   label={{ value: 'Assinantes', position: 'insideBottom', offset: -30 }} 
                 />
                 <YAxis 
-                  tickFormatter={(value) => formatCurrency(value, 'BRL').split(' ')[0].replace(';','')}
+                  tickFormatter={(value) => formatCurrency(value, 'BRL').split(' ')[0]}
                   label={{ value: 'Valor (BRL)', angle: -90, position: 'insideLeft' }}
                 />
                 <Tooltip content={<MilestoneTooltip />} />
