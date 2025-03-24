@@ -18,7 +18,7 @@ const ProjectionsTab: React.FC = () => {
 
     const points: ProjectionPoint[] = [];
     const breakEven = results.breakEvenUsers;
-    const step = Math.max(1, Math.ceil(breakEven));
+    const step = 5;//Math.max(1, Math.ceil(breakEven));
     
     // Calculate projection points
     for (let i = 0; i < projectionSize; i++) {
