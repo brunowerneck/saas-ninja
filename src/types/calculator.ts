@@ -44,6 +44,8 @@ export interface CalculationResults {
   monthlyRevenue: number;
   monthlyCosts: number;
   monthlyProfit: number;
+  monthlyTaxes: number;
+  monthlyGateway: number;
 }
 
 export interface ProjectionPoint {

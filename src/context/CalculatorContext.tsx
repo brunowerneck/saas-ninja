@@ -60,6 +60,8 @@ const initialResults: CalculationResults = {
   monthlyRevenue: 0,
   monthlyCosts: 0,
   monthlyProfit: 0,
+  monthlyTaxes: 0,
+  monthlyGateway: 0,
 };
 
 const CalculatorContext = createContext<CalculatorContextType>({
@@ -131,16 +133,16 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Calculate net revenue after payment gateway and taxes
   const calculateNetRevenuePerUser = (grossRevenue: number): number => {
-    // Apply payment gateway fees
-    const afterGatewayPercentage =
-      grossRevenue * (1 - state.paymentGatewayPercentage / 100);
-    const afterGatewayFixed =
-      afterGatewayPercentage - state.paymentGatewayFixed;
-
     // Apply taxes
-    const afterTaxes = afterGatewayFixed * (1 - state.taxRate / 100);
+    const taxAmount = (grossRevenue * state.taxRate) / 100;
+    // Apply payment gateway fees
+    const gatewayPercentageAmount =
+      (grossRevenue * state.paymentGatewayPercentage) / 100;
 
-    return afterTaxes;
+    return (
+      grossRevenue -
+      (taxAmount + gatewayPercentageAmount + state.paymentGatewayFixed)
+    );
   };
 
   // Main calculation function
@@ -188,13 +190,20 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     const monthlyProfit =
       (avgNetRevenuePerUser - perUserVariableCosts) * breakEvenUsers -
       totalFixedCosts;
-
+    const monthlyTaxes =
+      ((avgGrossRevenuePerUser * state.taxRate) / 100) * breakEvenUsers;
+    const monthlyGateway =
+      ((avgGrossRevenuePerUser * state.paymentGatewayPercentage) / 100) *
+        breakEvenUsers +
+      state.paymentGatewayFixed * breakEvenUsers;
     setResults({
       breakEvenUsers,
       workingCapital,
       monthlyRevenue,
       monthlyCosts: monthlyTotalCosts,
       monthlyProfit,
+      monthlyTaxes,
+      monthlyGateway,
     });
   };
 
