@@ -143,7 +143,7 @@ const ProjectionsTab: React.FC = () => {
                     }}
                     labelFormatter={(label) => `${label} assinantes`}
                     style={{
-                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      backgroundColor: 'rgba(0,0,0,1)',
                       borderRadius: '8px',
                       color: 'white',
                       padding: '10px',
