@@ -1,3 +1,4 @@
+
 import React from "react";
 import { CalculatorProvider } from "@/context/CalculatorContext";
 import Tabs from "@/components/Tabs";
@@ -5,6 +6,7 @@ import SubscriptionsTab from "@/components/SubscriptionsTab";
 import CostsTab from "@/components/CostsTab";
 import PaymentTab from "@/components/PaymentTab";
 import TaxesTab from "@/components/TaxesTab";
+import ProjectionsTab from "@/components/ProjectionsTab";
 import ResultsPanel from "@/components/ResultsPanel";
 import { useCalculator } from "@/context/CalculatorContext";
 
@@ -17,6 +19,7 @@ const TabContent: React.FC = () => {
       {state.activeTab === "costs" && <CostsTab />}
       {state.activeTab === "payment" && <PaymentTab />}
       {state.activeTab === "taxes" && <TaxesTab />}
+      {state.activeTab === "projections" && <ProjectionsTab />}
     </>
   );
 };

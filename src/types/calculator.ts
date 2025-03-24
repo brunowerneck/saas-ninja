@@ -35,7 +35,7 @@ export interface CalculatorState {
   taxRate: number;
   
   // Active tab
-  activeTab: 'subscriptions' | 'costs' | 'payment' | 'taxes';
+  activeTab: 'subscriptions' | 'costs' | 'payment' | 'taxes' | 'projections';
 }
 
 export interface CalculationResults {
@@ -44,4 +44,11 @@ export interface CalculationResults {
   monthlyRevenue: number;
   monthlyCosts: number;
   monthlyProfit: number;
+}
+
+export interface ProjectionPoint {
+  users: number;
+  revenue: number;
+  costs: number;
+  profit: number;
 }

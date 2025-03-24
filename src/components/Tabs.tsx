@@ -11,6 +11,7 @@ const Tabs: React.FC = () => {
     { id: 'costs', label: 'Custos' },
     { id: 'payment', label: 'Pagamento' },
     { id: 'taxes', label: 'Tributos' },
+    { id: 'projections', label: 'Projeções' },
   ] as const;
 
   return (

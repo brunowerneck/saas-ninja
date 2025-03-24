@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -27,7 +28,7 @@ interface CalculatorContextType {
   updatePaymentGatewayPercentage: (value: number) => void;
   updatePaymentGatewayFixed: (value: number) => void;
   updateTaxRate: (value: number) => void;
-  setActiveTab: (tab: "subscriptions" | "costs" | "payment" | "taxes") => void;
+  setActiveTab: (tab: "subscriptions" | "costs" | "payment" | "taxes" | "projections") => void;
 }
 
 const initialState: CalculatorState = {
