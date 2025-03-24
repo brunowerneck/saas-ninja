@@ -142,6 +142,15 @@ const ProjectionsTab: React.FC = () => {
                       return [name, value];
                     }}
                     labelFormatter={(label) => `${label} assinantes`}
+                    style={{
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      padding: '10px',
+                      fontSize: '14px',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                    }}
+
                   />
                 )}
               />
