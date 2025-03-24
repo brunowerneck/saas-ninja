@@ -12,7 +12,7 @@ import { TrendingUp } from 'lucide-react';
 
 const ProjectionsTab: React.FC = () => {
   const { state, results } = useCalculator();
-  const [growthRate, setGrowthRate] = useState<number>(15);
+  const [growthRate, setGrowthRate] = useState<number>(8);
   const [initialUsers, setInitialUsers] = useState<number>(10);
   
   const projections = useMemo(() => {
