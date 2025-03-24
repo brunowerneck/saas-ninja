@@ -290,7 +290,7 @@ const ProjectionsTab: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="users" 
-                  label={{ value: 'Assinantes', position: 'insideBottom', offset: -15 }} 
+                  label={{ value: 'Assinantes', position: 'insideBottom', offset: -30 }} 
                 />
                 <YAxis 
                   tickFormatter={(value) => formatCurrency(value, 'BRL').split(' ')[0]}
