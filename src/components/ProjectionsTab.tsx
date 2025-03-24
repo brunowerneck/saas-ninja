@@ -123,7 +123,7 @@ const ProjectionsTab: React.FC = () => {
           id="projectionSize"
           type="number"
           min="2"
-          max="20"
+          max="51"
           value={projectionSize}
           onChange={(e) => setProjectionSize(Math.max(2, Math.min(20, Number(e.target.value))))}
           className="max-w-xs text-white bg-app-card"
