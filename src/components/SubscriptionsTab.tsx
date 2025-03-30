@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Plus, Trash2, Info } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
@@ -36,30 +37,39 @@ const SubscriptionsTab: React.FC = () => {
     updateDollarRate,
     addSubscriptionPlan,
     removeSubscriptionPlan,
+    updateSubscriptionPlanWeight,
   } = useCalculator();
 
   const [newPlanName, setNewPlanName] = useState("");
   const [newPlanPrice, setNewPlanPrice] = useState("");
   const [newPlanCurrency, setNewPlanCurrency] = useState<Currency>("BRL");
+  const [newPlanWeight, setNewPlanWeight] = useState("1");
 
   const handleAddPlan = () => {
     if (newPlanName && newPlanPrice) {
       addSubscriptionPlan(
         newPlanName,
         parseFloat(newPlanPrice),
-        newPlanCurrency
+        newPlanCurrency,
+        parseFloat(newPlanWeight) || 1
       );
       setNewPlanName("");
       setNewPlanPrice("");
+      setNewPlanWeight("1");
     }
   };
+
+  const totalWeight = state.subscriptionPlans.reduce(
+    (sum, plan) => sum + (plan.weight || 1),
+    0
+  );
 
   return (
     <div className="bg-app-card border border-app-border rounded-lg p-5 animate-fade-in">
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Planos de Assinatura</h2>
         <p className="text-white/60 text-sm mb-4">
-          Adicione os planos de assinatura do seu SaaS.
+          Adicione os planos de assinatura do seu SaaS e defina a proporção de usuários em cada plano.
         </p>
 
         <div className="mb-5">
@@ -107,6 +117,23 @@ const SubscriptionsTab: React.FC = () => {
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[250px]">Plano</TableHead>
               <TableHead className="text-right">Valor</TableHead>
+              <TableHead className="text-center">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="flex items-center justify-center">
+                        Peso <Info size={14} className="ml-1 info-icon" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs max-w-xs">
+                        Proporção de usuários em cada plano. Um peso maior significa mais usuários neste plano.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
+              <TableHead className="text-center">Distribuição</TableHead>
               <TableHead className="text-center">Ação</TableHead>
             </TableRow>
           </TableHeader>
@@ -116,6 +143,20 @@ const SubscriptionsTab: React.FC = () => {
                 <TableCell className="font-medium">{plan.name}</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(plan.price, plan.currency)}
+                </TableCell>
+                <TableCell className="text-center">
+                  <input
+                    type="number"
+                    min="1"
+                    value={plan.weight || 1}
+                    onChange={(e) => updateSubscriptionPlanWeight(plan.id, parseFloat(e.target.value) || 1)}
+                    className="form-input w-16 text-center"
+                  />
+                </TableCell>
+                <TableCell className="text-center">
+                  {totalWeight > 0 ? 
+                    `${Math.round(((plan.weight || 1) / totalWeight) * 100)}%` : 
+                    '0%'}
                 </TableCell>
                 <TableCell className="text-center">
                   <button
@@ -138,44 +179,78 @@ const SubscriptionsTab: React.FC = () => {
             </button>
           </DialogTrigger>
           <DialogContent className="bg-app-dark max-w-[750px]">
-            <div className="cost-item">
-              <input
-                type="text"
-                value={newPlanName}
-                onChange={(e) => setNewPlanName(e.target.value)}
-                className="form-input flex-1"
-                placeholder="Nome do plano"
-              />
-              <select
-                value={newPlanCurrency}
-                onChange={(e) => setNewPlanCurrency(e.target.value as Currency)}
-                className="currency-select flex-none w-16"
-              >
-                <option value="BRL" className="bg-app-dark text-white">
-                  R$
-                </option>
-                <option value="USD" className="bg-app-dark text-white">
-                  US$
-                </option>
-              </select>
-              <input
-                type="number"
-                value={newPlanPrice}
-                onChange={(e) => setNewPlanPrice(e.target.value)}
-                className="form-input flex-1"
-                placeholder="Valor"
-                step="0.01"
-                min="0"
-              />
-              <button
-                onClick={() => {}}
-                className="opacity-0 pointer-events-none delete-button"
-                aria-label="Placeholder button"
-              >
-                <Trash2 size={18} className="text-white/70" />
-              </button>
+            <div className="flex flex-col space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Nome do plano</label>
+                  <input
+                    type="text"
+                    value={newPlanName}
+                    onChange={(e) => setNewPlanName(e.target.value)}
+                    className="form-input w-full"
+                    placeholder="Nome do plano"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-1/3">
+                    <label className="text-sm font-medium mb-1 block">Moeda</label>
+                    <select
+                      value={newPlanCurrency}
+                      onChange={(e) => setNewPlanCurrency(e.target.value as Currency)}
+                      className="currency-select w-full"
+                    >
+                      <option value="BRL" className="bg-app-dark text-white">
+                        R$
+                      </option>
+                      <option value="USD" className="bg-app-dark text-white">
+                        US$
+                      </option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="text-sm font-medium mb-1 block">Valor</label>
+                    <input
+                      type="number"
+                      value={newPlanPrice}
+                      onChange={(e) => setNewPlanPrice(e.target.value)}
+                      className="form-input w-full"
+                      placeholder="Valor"
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block flex items-center">
+                  Peso de distribuição
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Info size={14} className="ml-1.5 info-icon" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">
+                          Define a proporção de usuários em cada plano. Um peso 2 significa o dobro de usuários em relação a um peso 1.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </label>
+                <input
+                  type="number"
+                  value={newPlanWeight}
+                  onChange={(e) => setNewPlanWeight(e.target.value)}
+                  className="form-input w-full"
+                  placeholder="Peso"
+                  min="1"
+                  step="1"
+                />
+              </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-4">
               <DialogClose asChild>
                 <button className="add-button" onClick={handleAddPlan}>
                   <Plus size={18} className="mr-2" /> Adicionar Plano

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -15,9 +16,11 @@ interface CalculatorContextType {
   addSubscriptionPlan: (
     name: string,
     price: number,
-    currency: Currency
+    currency: Currency,
+    weight: number
   ) => void;
   removeSubscriptionPlan: (id: string) => void;
+  updateSubscriptionPlanWeight: (id: string, weight: number) => void;
   addMonthlyCost: (name: string, value: number, currency: Currency) => void;
   removeMonthlyCost: (id: string) => void;
   addAnnualCost: (name: string, value: number, currency: Currency) => void;
@@ -35,8 +38,8 @@ interface CalculatorContextType {
 const initialState: CalculatorState = {
   dollarRate: 5.73,
   subscriptionPlans: [
-    { id: uuidv4(), name: "Basic Plan", price: 14.9, currency: "BRL" },
-    { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL" },
+    { id: uuidv4(), name: "Basic Plan", price: 14.9, currency: "BRL", weight: 3 },
+    { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL", weight: 1 },
   ],
   monthlyCosts: [
     { id: uuidv4(), name: "Hosting", value: 19, currency: "USD" },
@@ -70,6 +73,7 @@ const CalculatorContext = createContext<CalculatorContextType>({
   updateDollarRate: () => {},
   addSubscriptionPlan: () => {},
   removeSubscriptionPlan: () => {},
+  updateSubscriptionPlanWeight: () => {},
   addMonthlyCost: () => {},
   removeMonthlyCost: () => {},
   addAnnualCost: () => {},
@@ -119,16 +123,23 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     return fixedMonthlyCosts + monthlyAnnualCosts + totalPerUserCosts;
   };
 
-  // Calculate average revenue per user
+  // Calculate weighted average revenue per user
   const calculateAverageRevenuePerUser = (): number => {
     if (state.subscriptionPlans.length === 0) return 0;
 
-    const totalRevenue = state.subscriptionPlans.reduce(
-      (sum, plan) => sum + normalizeAmount(plan.price, plan.currency),
+    const totalWeight = state.subscriptionPlans.reduce(
+      (sum, plan) => sum + (plan.weight || 1),
       0
     );
 
-    return totalRevenue / state.subscriptionPlans.length;
+    if (totalWeight === 0) return 0;
+
+    const weightedTotalRevenue = state.subscriptionPlans.reduce(
+      (sum, plan) => sum + normalizeAmount(plan.price, plan.currency) * (plan.weight || 1),
+      0
+    );
+
+    return weightedTotalRevenue / totalWeight;
   };
 
   // Calculate net revenue after payment gateway and taxes
@@ -220,13 +231,14 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
   const addSubscriptionPlan = (
     name: string,
     price: number,
-    currency: Currency
+    currency: Currency,
+    weight: number = 1
   ) => {
     setState((prev) => ({
       ...prev,
       subscriptionPlans: [
         ...prev.subscriptionPlans,
-        { id: uuidv4(), name, price, currency },
+        { id: uuidv4(), name, price, currency, weight },
       ],
     }));
   };
@@ -236,6 +248,15 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       ...prev,
       subscriptionPlans: prev.subscriptionPlans.filter(
         (plan) => plan.id !== id
+      ),
+    }));
+  };
+  
+  const updateSubscriptionPlanWeight = (id: string, weight: number) => {
+    setState((prev) => ({
+      ...prev,
+      subscriptionPlans: prev.subscriptionPlans.map((plan) =>
+        plan.id === id ? { ...plan, weight } : plan
       ),
     }));
   };
@@ -304,7 +325,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const setActiveTab = (
-    tab: "subscriptions" | "costs" | "payment" | "taxes"
+    tab: "subscriptions" | "costs" | "payment" | "taxes" | "projections"
   ) => {
     setState((prev) => ({ ...prev, activeTab: tab }));
   };
@@ -317,6 +338,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
         updateDollarRate,
         addSubscriptionPlan,
         removeSubscriptionPlan,
+        updateSubscriptionPlanWeight,
         addMonthlyCost,
         removeMonthlyCost,
         addAnnualCost,

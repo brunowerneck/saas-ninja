@@ -6,6 +6,7 @@ export interface SubscriptionPlan {
   name: string;
   price: number;
   currency: Currency;
+  weight: number; // Added weight property for distribution ratio
 }
 
 export interface CostItem {
@@ -54,4 +55,6 @@ export interface ProjectionPoint {
   costs: number;
   profit: number;
   month?: number;
+  costPercentage?: number; // Percentage of costs over revenue
+  is40RuleCompliant?: boolean; // Whether it meets the 40% rule
 }

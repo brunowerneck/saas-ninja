@@ -1,9 +1,16 @@
+
 import React from "react";
 import { useCalculator } from "@/context/CalculatorContext";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 const ResultsPanel: React.FC = () => {
-  const { results } = useCalculator();
+  const { results, state } = useCalculator();
+  
+  // Calculate the weighted distribution
+  const totalWeight = state.subscriptionPlans.reduce(
+    (sum, plan) => sum + (plan.weight || 1),
+    0
+  );
 
   return (
     <div className="bg-app-card border border-app-border rounded-lg overflow-hidden h-full animate-fade-in">
@@ -25,6 +32,23 @@ const ResultsPanel: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Distribution info */}
+        {state.subscriptionPlans.length > 0 && (
+          <div className="result-card">
+            <h3 className="text-lg font-medium mb-3">Distribuição de Planos</h3>
+            {state.subscriptionPlans.map(plan => (
+              <div key={plan.id} className="flex justify-between items-center mb-2 last:mb-0">
+                <span className="text-white/80">{plan.name}:</span>
+                <span className="text-white font-medium">
+                  {totalWeight > 0 ? 
+                    `${Math.round(((plan.weight || 1) / totalWeight) * 100)}%` : 
+                    '0%'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Working Capital */}
         <div className="result-card">
