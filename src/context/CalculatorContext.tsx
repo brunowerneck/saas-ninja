@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -21,12 +20,24 @@ interface CalculatorContextType {
   ) => void;
   removeSubscriptionPlan: (id: string) => void;
   updateSubscriptionPlanWeight: (id: string, weight: number) => void;
+  updateSubscriptionPlanName: (id: string, name: string) => void;
+  updateSubscriptionPlanPrice: (id: string, price: number) => void;
+  updateSubscriptionPlanCurrency: (id: string, currency: Currency) => void;
   addMonthlyCost: (name: string, value: number, currency: Currency) => void;
   removeMonthlyCost: (id: string) => void;
+  updateMonthlyCostName: (id: string, name: string) => void;
+  updateMonthlyCostValue: (id: string, value: number) => void;
+  updateMonthlyCostCurrency: (id: string, currency: Currency) => void;
   addAnnualCost: (name: string, value: number, currency: Currency) => void;
   removeAnnualCost: (id: string) => void;
+  updateAnnualCostName: (id: string, name: string) => void;
+  updateAnnualCostValue: (id: string, value: number) => void;
+  updateAnnualCostCurrency: (id: string, currency: Currency) => void;
   addPerUserCost: (name: string, value: number, currency: Currency) => void;
   removePerUserCost: (id: string) => void;
+  updatePerUserCostName: (id: string, name: string) => void;
+  updatePerUserCostValue: (id: string, value: number) => void;
+  updatePerUserCostCurrency: (id: string, currency: Currency) => void;
   updatePaymentGatewayPercentage: (value: number) => void;
   updatePaymentGatewayFixed: (value: number) => void;
   updateTaxRate: (value: number) => void;
@@ -74,12 +85,24 @@ const CalculatorContext = createContext<CalculatorContextType>({
   addSubscriptionPlan: () => {},
   removeSubscriptionPlan: () => {},
   updateSubscriptionPlanWeight: () => {},
+  updateSubscriptionPlanName: () => {},
+  updateSubscriptionPlanPrice: () => {},
+  updateSubscriptionPlanCurrency: () => {},
   addMonthlyCost: () => {},
   removeMonthlyCost: () => {},
+  updateMonthlyCostName: () => {},
+  updateMonthlyCostValue: () => {},
+  updateMonthlyCostCurrency: () => {},
   addAnnualCost: () => {},
   removeAnnualCost: () => {},
+  updateAnnualCostName: () => {},
+  updateAnnualCostValue: () => {},
+  updateAnnualCostCurrency: () => {},
   addPerUserCost: () => {},
   removePerUserCost: () => {},
+  updatePerUserCostName: () => {},
+  updatePerUserCostValue: () => {},
+  updatePerUserCostCurrency: () => {},
   updatePaymentGatewayPercentage: () => {},
   updatePaymentGatewayFixed: () => {},
   updateTaxRate: () => {},
@@ -94,26 +117,21 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [state, setState] = useState<CalculatorState>(initialState);
   const [results, setResults] = useState<CalculationResults>(initialResults);
 
-  // Helper function to normalize amount to BRL
   const normalizeAmount = (amount: number, currency: Currency): number => {
     return currency === "USD" ? amount * state.dollarRate : amount;
   };
 
-  // Calculate total monthly cost
   const calculateMonthlyCosts = (userCount: number): number => {
-    // Fixed monthly costs
     const fixedMonthlyCosts = state.monthlyCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
       0
     );
 
-    // Annual costs converted to monthly
     const monthlyAnnualCosts = state.annualCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency) / 12,
       0
     );
 
-    // Per user costs
     const totalPerUserCosts = state.perUserCosts.reduce(
       (sum, cost) =>
         sum + normalizeAmount(cost.value, cost.currency) * userCount,
@@ -123,7 +141,6 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     return fixedMonthlyCosts + monthlyAnnualCosts + totalPerUserCosts;
   };
 
-  // Calculate weighted average revenue per user
   const calculateAverageRevenuePerUser = (): number => {
     if (state.subscriptionPlans.length === 0) return 0;
 
@@ -142,11 +159,8 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     return weightedTotalRevenue / totalWeight;
   };
 
-  // Calculate net revenue after payment gateway and taxes
   const calculateNetRevenuePerUser = (grossRevenue: number): number => {
-    // Apply taxes
     const taxAmount = (grossRevenue * state.taxRate) / 100;
-    // Apply payment gateway fees
     const gatewayPercentageAmount =
       (grossRevenue * state.paymentGatewayPercentage) / 100;
 
@@ -156,21 +170,15 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  // Main calculation function
   const performCalculations = () => {
-    // Calculate average subscription revenue
     const avgGrossRevenuePerUser = calculateAverageRevenuePerUser();
-    const avgNetRevenuePerUser = calculateNetRevenuePerUser(
-      avgGrossRevenuePerUser
-    );
+    const avgNetRevenuePerUser = calculateNetRevenuePerUser(avgGrossRevenuePerUser);
 
-    // Calculate per-user costs
     const perUserVariableCosts = state.perUserCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
       0
     );
 
-    // Calculate fixed costs (monthly + annual/12)
     const fixedMonthlyCosts = state.monthlyCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
       0
@@ -181,22 +189,18 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     );
     const totalFixedCosts = fixedMonthlyCosts + monthlyAnnualCosts;
 
-    // Calculate break-even point (users)
-    // Formula: Fixed Costs / (Net Revenue per User - Variable Costs per User)
     let breakEvenUsers = 0;
     if (avgNetRevenuePerUser > perUserVariableCosts) {
       breakEvenUsers = Math.ceil(
         totalFixedCosts / (avgNetRevenuePerUser - perUserVariableCosts)
       );
     } else {
-      breakEvenUsers = Infinity; // Not possible to break even
+      breakEvenUsers = Infinity;
     }
 
-    // Working capital (3 months of costs)
     const monthlyTotalCosts = calculateMonthlyCosts(breakEvenUsers);
     const workingCapital = monthlyTotalCosts * 3;
 
-    // Calculate monthly revenue, costs and profit at break-even point
     const monthlyRevenue = breakEvenUsers * avgGrossRevenuePerUser;
     const monthlyProfit =
       (avgNetRevenuePerUser - perUserVariableCosts) * breakEvenUsers -
@@ -218,12 +222,10 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Run calculations whenever state changes
   useEffect(() => {
     performCalculations();
   }, [state]);
 
-  // Context methods
   const updateDollarRate = (rate: number) => {
     setState((prev) => ({ ...prev, dollarRate: rate }));
   };
@@ -251,12 +253,39 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       ),
     }));
   };
-  
+
   const updateSubscriptionPlanWeight = (id: string, weight: number) => {
     setState((prev) => ({
       ...prev,
       subscriptionPlans: prev.subscriptionPlans.map((plan) =>
         plan.id === id ? { ...plan, weight } : plan
+      ),
+    }));
+  };
+
+  const updateSubscriptionPlanName = (id: string, name: string) => {
+    setState((prev) => ({
+      ...prev,
+      subscriptionPlans: prev.subscriptionPlans.map((plan) =>
+        plan.id === id ? { ...plan, name } : plan
+      ),
+    }));
+  };
+
+  const updateSubscriptionPlanPrice = (id: string, price: number) => {
+    setState((prev) => ({
+      ...prev,
+      subscriptionPlans: prev.subscriptionPlans.map((plan) =>
+        plan.id === id ? { ...plan, price } : plan
+      ),
+    }));
+  };
+
+  const updateSubscriptionPlanCurrency = (id: string, currency: Currency) => {
+    setState((prev) => ({
+      ...prev,
+      subscriptionPlans: prev.subscriptionPlans.map((plan) =>
+        plan.id === id ? { ...plan, currency } : plan
       ),
     }));
   };
@@ -278,6 +307,33 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   };
 
+  const updateMonthlyCostName = (id: string, name: string) => {
+    setState((prev) => ({
+      ...prev,
+      monthlyCosts: prev.monthlyCosts.map((cost) =>
+        cost.id === id ? { ...cost, name } : cost
+      ),
+    }));
+  };
+
+  const updateMonthlyCostValue = (id: string, value: number) => {
+    setState((prev) => ({
+      ...prev,
+      monthlyCosts: prev.monthlyCosts.map((cost) =>
+        cost.id === id ? { ...cost, value } : cost
+      ),
+    }));
+  };
+
+  const updateMonthlyCostCurrency = (id: string, currency: Currency) => {
+    setState((prev) => ({
+      ...prev,
+      monthlyCosts: prev.monthlyCosts.map((cost) =>
+        cost.id === id ? { ...cost, currency } : cost
+      ),
+    }));
+  };
+
   const addAnnualCost = (name: string, value: number, currency: Currency) => {
     setState((prev) => ({
       ...prev,
@@ -295,6 +351,33 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   };
 
+  const updateAnnualCostName = (id: string, name: string) => {
+    setState((prev) => ({
+      ...prev,
+      annualCosts: prev.annualCosts.map((cost) =>
+        cost.id === id ? { ...cost, name } : cost
+      ),
+    }));
+  };
+
+  const updateAnnualCostValue = (id: string, value: number) => {
+    setState((prev) => ({
+      ...prev,
+      annualCosts: prev.annualCosts.map((cost) =>
+        cost.id === id ? { ...cost, value } : cost
+      ),
+    }));
+  };
+
+  const updateAnnualCostCurrency = (id: string, currency: Currency) => {
+    setState((prev) => ({
+      ...prev,
+      annualCosts: prev.annualCosts.map((cost) =>
+        cost.id === id ? { ...cost, currency } : cost
+      ),
+    }));
+  };
+
   const addPerUserCost = (name: string, value: number, currency: Currency) => {
     setState((prev) => ({
       ...prev,
@@ -309,6 +392,33 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prev) => ({
       ...prev,
       perUserCosts: prev.perUserCosts.filter((cost) => cost.id !== id),
+    }));
+  };
+
+  const updatePerUserCostName = (id: string, name: string) => {
+    setState((prev) => ({
+      ...prev,
+      perUserCosts: prev.perUserCosts.map((cost) =>
+        cost.id === id ? { ...cost, name } : cost
+      ),
+    }));
+  };
+
+  const updatePerUserCostValue = (id: string, value: number) => {
+    setState((prev) => ({
+      ...prev,
+      perUserCosts: prev.perUserCosts.map((cost) =>
+        cost.id === id ? { ...cost, value } : cost
+      ),
+    }));
+  };
+
+  const updatePerUserCostCurrency = (id: string, currency: Currency) => {
+    setState((prev) => ({
+      ...prev,
+      perUserCosts: prev.perUserCosts.map((cost) =>
+        cost.id === id ? { ...cost, currency } : cost
+      ),
     }));
   };
 
@@ -339,12 +449,24 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
         addSubscriptionPlan,
         removeSubscriptionPlan,
         updateSubscriptionPlanWeight,
+        updateSubscriptionPlanName,
+        updateSubscriptionPlanPrice,
+        updateSubscriptionPlanCurrency,
         addMonthlyCost,
         removeMonthlyCost,
+        updateMonthlyCostName,
+        updateMonthlyCostValue,
+        updateMonthlyCostCurrency,
         addAnnualCost,
         removeAnnualCost,
+        updateAnnualCostName,
+        updateAnnualCostValue,
+        updateAnnualCostCurrency,
         addPerUserCost,
         removePerUserCost,
+        updatePerUserCostName,
+        updatePerUserCostValue,
+        updatePerUserCostCurrency,
         updatePaymentGatewayPercentage,
         updatePaymentGatewayFixed,
         updateTaxRate,
