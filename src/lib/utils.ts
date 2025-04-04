@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -5,10 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const formatCurrency = (value: number, currency: string): string => {
+export const formatCurrency = (value: number, currency: string = "BRL"): string => {
   let country: string = "pt-BR";
 
-  if (currency == "USD") {
+  if (currency === "USD") {
     country = "en-US"
   }
 

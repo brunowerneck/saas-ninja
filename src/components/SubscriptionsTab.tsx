@@ -1,9 +1,10 @@
 
 import React, { useState } from "react";
-import { Plus, Trash2, Info } from "lucide-react";
+import { Plus, Trash2, Info, Pencil } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
-import { Currency } from "@/types/calculator";
+import { Currency, EditableItemState } from "@/types/calculator";
 import { Tooltip } from "@/components/ui/tooltip";
+import EditableCell from "./EditableCell";
 import {
   TooltipContent,
   TooltipProvider,
@@ -13,10 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -38,12 +36,16 @@ const SubscriptionsTab: React.FC = () => {
     addSubscriptionPlan,
     removeSubscriptionPlan,
     updateSubscriptionPlanWeight,
+    updateSubscriptionPlanName,
+    updateSubscriptionPlanPrice,
+    updateSubscriptionPlanCurrency,
   } = useCalculator();
 
   const [newPlanName, setNewPlanName] = useState("");
   const [newPlanPrice, setNewPlanPrice] = useState("");
   const [newPlanCurrency, setNewPlanCurrency] = useState<Currency>("BRL");
   const [newPlanWeight, setNewPlanWeight] = useState("1");
+  const [editingItem, setEditingItem] = useState<EditableItemState>({ id: null, field: null });
 
   const handleAddPlan = () => {
     if (newPlanName && newPlanPrice) {
@@ -63,6 +65,14 @@ const SubscriptionsTab: React.FC = () => {
     (sum, plan) => sum + (plan.weight || 1),
     0
   );
+
+  const startEditing = (id: string, field: string) => {
+    setEditingItem({ id, field });
+  };
+
+  const cancelEditing = () => {
+    setEditingItem({ id: null, field: null });
+  };
 
   return (
     <div className="bg-app-card border border-app-border rounded-lg p-5 animate-fade-in">
@@ -140,18 +150,81 @@ const SubscriptionsTab: React.FC = () => {
           <TableBody>
             {state.subscriptionPlans.map((plan) => (
               <TableRow key={plan.id} className="hover:bg-white/10">
-                <TableCell className="font-medium">{plan.name}</TableCell>
+                <TableCell className="font-medium">
+                  {editingItem.id === plan.id && editingItem.field === 'name' ? (
+                    <EditableCell 
+                      value={plan.name}
+                      onSave={(value) => {
+                        updateSubscriptionPlanName(plan.id, String(value));
+                        cancelEditing();
+                      }}
+                      onCancel={cancelEditing}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      {plan.name}
+                      <button 
+                        onClick={() => startEditing(plan.id, 'name')} 
+                        className="ml-2 opacity-30 hover:opacity-100"
+                        aria-label="Edit name"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(plan.price, plan.currency)}
+                  {editingItem.id === plan.id && editingItem.field === 'price' ? (
+                    <EditableCell 
+                      value={plan.price}
+                      onSave={(value) => {
+                        updateSubscriptionPlanPrice(plan.id, Number(value));
+                        cancelEditing();
+                      }}
+                      onCancel={cancelEditing}
+                      type="currency"
+                      min={0}
+                      currencyValue={plan.currency}
+                      onCurrencyChange={(currency) => updateSubscriptionPlanCurrency(plan.id, currency)}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-end">
+                      <button 
+                        onClick={() => startEditing(plan.id, 'price')} 
+                        className="mr-2 opacity-30 hover:opacity-100"
+                        aria-label="Edit price"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      {formatCurrency(plan.price, plan.currency)}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="text-center">
-                  <input
-                    type="number"
-                    min="1"
-                    value={plan.weight || 1}
-                    onChange={(e) => updateSubscriptionPlanWeight(plan.id, parseFloat(e.target.value) || 1)}
-                    className="form-input w-16 text-center"
-                  />
+                  {editingItem.id === plan.id && editingItem.field === 'weight' ? (
+                    <EditableCell 
+                      value={plan.weight || 1}
+                      onSave={(value) => {
+                        updateSubscriptionPlanWeight(plan.id, Number(value) || 1);
+                        cancelEditing();
+                      }}
+                      onCancel={cancelEditing}
+                      type="number"
+                      min={1}
+                      step="1"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <button 
+                        onClick={() => startEditing(plan.id, 'weight')} 
+                        className="mr-1 opacity-30 hover:opacity-100"
+                        aria-label="Edit weight"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      {plan.weight || 1}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="text-center">
                   {totalWeight > 0 ? 

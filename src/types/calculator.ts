@@ -58,3 +58,8 @@ export interface ProjectionPoint {
   costPercentage?: number; // Percentage of costs over revenue
   is40RuleCompliant?: boolean; // Whether it meets the 40% rule
 }
+
+export interface EditableItemState {
+  id: string | null;
+  field: string | null;
+}

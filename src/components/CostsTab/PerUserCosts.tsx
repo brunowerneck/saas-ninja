@@ -1,7 +1,9 @@
+
 import React, { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
-import { Currency } from "@/types/calculator";
+import { Currency, EditableItemState } from "@/types/calculator";
+import EditableCell from "../EditableCell";
 import {
   Dialog,
   DialogContent,
@@ -20,11 +22,19 @@ import {
 import { formatCurrency } from "@/utils/formatCurrency";
 
 export const PerUserCosts: React.FC = () => {
-  const { state, addPerUserCost, removePerUserCost } = useCalculator();
+  const { 
+    state, 
+    addPerUserCost, 
+    removePerUserCost,
+    updatePerUserCostName,
+    updatePerUserCostValue,
+    updatePerUserCostCurrency
+  } = useCalculator();
+  
   const [newPerUserCostName, setNewPerUserCostName] = useState("");
   const [newPerUserCostValue, setNewPerUserCostValue] = useState("");
-  const [newPerUserCostCurrency, setNewPerUserCostCurrency] =
-    useState<Currency>("BRL");
+  const [newPerUserCostCurrency, setNewPerUserCostCurrency] = useState<Currency>("BRL");
+  const [editingItem, setEditingItem] = useState<EditableItemState>({ id: null, field: null });
 
   const handleAddPerUserCost = () => {
     if (newPerUserCostName && newPerUserCostValue) {
@@ -36,6 +46,14 @@ export const PerUserCosts: React.FC = () => {
       setNewPerUserCostName("");
       setNewPerUserCostValue("");
     }
+  };
+
+  const startEditing = (id: string, field: string) => {
+    setEditingItem({ id, field });
+  };
+
+  const cancelEditing = () => {
+    setEditingItem({ id: null, field: null });
   };
 
   return (
@@ -58,9 +76,55 @@ export const PerUserCosts: React.FC = () => {
         <TableBody>
           {state.perUserCosts.map((cost) => (
             <TableRow key={cost.id} className="hover:bg-white/10">
-              <TableCell className="font-medium">{cost.name}</TableCell>
+              <TableCell className="font-medium">
+                {editingItem.id === cost.id && editingItem.field === 'name' ? (
+                  <EditableCell 
+                    value={cost.name}
+                    onSave={(value) => {
+                      updatePerUserCostName(cost.id, String(value));
+                      cancelEditing();
+                    }}
+                    onCancel={cancelEditing}
+                  />
+                ) : (
+                  <div className="flex items-center justify-between">
+                    {cost.name}
+                    <button 
+                      onClick={() => startEditing(cost.id, 'name')} 
+                      className="ml-2 opacity-30 hover:opacity-100"
+                      aria-label="Edit name"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  </div>
+                )}
+              </TableCell>
               <TableCell className="text-right">
-                {formatCurrency(cost.value, cost.currency)}
+                {editingItem.id === cost.id && editingItem.field === 'value' ? (
+                  <EditableCell 
+                    value={cost.value}
+                    onSave={(value) => {
+                      updatePerUserCostValue(cost.id, Number(value));
+                      cancelEditing();
+                    }}
+                    onCancel={cancelEditing}
+                    type="currency"
+                    min={0}
+                    currencyValue={cost.currency}
+                    onCurrencyChange={(currency) => updatePerUserCostCurrency(cost.id, currency)}
+                  />
+                ) : (
+                  <div className="flex items-center justify-end">
+                    <button 
+                      onClick={() => startEditing(cost.id, 'value')} 
+                      className="mr-2 opacity-30 hover:opacity-100"
+                      aria-label="Edit value"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    {formatCurrency(cost.value, cost.currency)}
+                  </div>
+                )}
               </TableCell>
               <TableCell className="text-center">
                 <button
@@ -114,13 +178,6 @@ export const PerUserCosts: React.FC = () => {
               step="0.01"
               min="0"
             />
-            <button
-              onClick={() => {}}
-              className="opacity-0 pointer-events-none delete-button"
-              aria-label="Placeholder button"
-            >
-              <Trash2 size={18} className="text-white/70" />
-            </button>
           </div>
           <DialogFooter>
             <DialogClose asChild>
