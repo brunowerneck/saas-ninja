@@ -58,10 +58,10 @@ const initialState: CalculatorState = {
     { id: uuidv4(), name: "Hosting", value: 19, currency: "USD" },
     { id: uuidv4(), name: "Database", value: 25, currency: "USD" },
     { id: uuidv4(), name: "Ferramentas DEV", value: 50, currency: "USD" },
-    { id: uuidv4(), name: "Contador", value: 207.9, currency: "BRL" },
+    { id: uuidv4(), name: "Contador", value: 250, currency: "BRL" },
   ],
   annualCosts: [
-    { id: uuidv4(), name: "Domínio", value: 49.9, currency: "USD" },
+    { id: uuidv4(), name: "Domínio", value: 24.9, currency: "USD" },
   ],
   perUserCosts: [{ id: uuidv4(), name: "OpenAI", value: 1, currency: "USD" }],
   paymentGatewayPercentage: 3.99,
