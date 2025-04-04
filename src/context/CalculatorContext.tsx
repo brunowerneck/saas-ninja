@@ -51,14 +51,15 @@ interface CalculatorContextType {
 const initialState: CalculatorState = {
   dollarRate: 5.73,
   subscriptionPlans: [
-    { id: uuidv4(), name: "Basic Plan", price: 14.9, currency: "BRL", weight: 3 },
-    { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL", weight: 1 },
+    { id: uuidv4(), name: "Basic Plan", price: 14.9, currency: "BRL", weight: 80 },
+    { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL", weight: 20 },
   ],
   monthlyCosts: [
-    { id: uuidv4(), name: "Hosting", value: 19, currency: "USD" },
+    { id: uuidv4(), name: "Hosting", value: 10, currency: "USD" },
     { id: uuidv4(), name: "Database", value: 25, currency: "USD" },
     { id: uuidv4(), name: "Ferramentas DEV", value: 50, currency: "USD" },
     { id: uuidv4(), name: "Contador", value: 250, currency: "BRL" },
+    { id: uuidv4(), name: "Publicidade", value: 1500, currency: "BRL" },
   ],
   annualCosts: [
     { id: uuidv4(), name: "Domínio", value: 24.9, currency: "USD" },

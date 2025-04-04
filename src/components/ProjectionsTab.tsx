@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 const ProjectionsTab: React.FC = () => {
   const { state, results, updateMonthlyChurnRate, updateAcquisitionCostPerUser } = useCalculator();
   const [growthRate, setGrowthRate] = useState<number>(8);
-  const [initialUsers, setInitialUsers] = useState<number>(10);
+  const [initialUsers, setInitialUsers] = useState<number>(30);
   const [projectionTab, setProjectionTab] = useState<string>("time");
   
   // Unit economics calculation
@@ -506,7 +506,7 @@ const ProjectionsTab: React.FC = () => {
               <Card className="bg-app-dark border-app-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center justify-between">
-                    <span className="text-white">LTV:CAC</span>
+                    <span>LTV:CAC</span>
                     <Badge className={`${getLTVCACRating(results.ltv2CacRatio).color} bg-transparent`}>
                       {getLTVCACRating(results.ltv2CacRatio).label}
                     </Badge>
@@ -514,7 +514,7 @@ const ProjectionsTab: React.FC = () => {
                   <CardDescription>Valor do cliente vs. custo de aquisição</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl text-white font-bold">
+                  <div className="text-2xl font-bold">
                     {results.ltv2CacRatio === Infinity ? "∞" : results.ltv2CacRatio.toFixed(1)}x
                   </div>
                   <p className="text-xs text-white/60 mt-1">
@@ -526,7 +526,7 @@ const ProjectionsTab: React.FC = () => {
               <Card className="bg-app-dark border-app-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center justify-between">
-                    <span className="text-white">Payback Period</span>
+                    <span>Payback Period</span>
                     <Badge className={`${getPaybackRating(results.paybackPeriodMonths).color} bg-transparent`}>
                       {getPaybackRating(results.paybackPeriodMonths).label}
                     </Badge>
@@ -534,7 +534,7 @@ const ProjectionsTab: React.FC = () => {
                   <CardDescription>Tempo para recuperar custo de aquisição</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl text-white font-bold">
+                  <div className="text-2xl font-bold">
                     {results.paybackPeriodMonths === Infinity ? "∞" : `${results.paybackPeriodMonths.toFixed(1)}`}
                   </div>
                   <p className="text-xs text-white/60 mt-1">
@@ -546,7 +546,7 @@ const ProjectionsTab: React.FC = () => {
               <Card className="bg-app-dark border-app-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center justify-between">
-                    <span className="text-white">Margem Bruta</span>
+                    <span>Margem Bruta</span>
                     <Badge className={`${unitEconomics.grossMargin > 70 ? 'text-green-400' : 
                                         unitEconomics.grossMargin > 40 ? 'text-yellow-400' : 'text-red-500'} bg-transparent`}>
                       {unitEconomics.grossMargin > 70 ? 'Excelente' : 
@@ -556,7 +556,7 @@ const ProjectionsTab: React.FC = () => {
                   <CardDescription>Margem antes de gastos fixos</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl text-white font-bold">
+                  <div className="text-2xl font-bold">
                     {unitEconomics.grossMargin.toFixed(1)}%
                   </div>
                   <p className="text-xs text-white/60 mt-1">
