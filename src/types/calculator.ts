@@ -34,6 +34,10 @@ export interface CalculatorState {
   
   // Tax rate
   taxRate: number;
+
+  // Churn and growth
+  monthlyChurnRate: number;
+  acquisitionCostPerUser: number;
   
   // Active tab
   activeTab: 'subscriptions' | 'costs' | 'payment' | 'taxes' | 'projections';
@@ -47,6 +51,10 @@ export interface CalculationResults {
   monthlyProfit: number;
   monthlyTaxes: number;
   monthlyGateway: number;
+  customerLifetimeValue: number;
+  customerAcquisitionCost: number;
+  ltv2CacRatio: number;
+  paybackPeriodMonths: number;
 }
 
 export interface ProjectionPoint {
@@ -57,9 +65,24 @@ export interface ProjectionPoint {
   month?: number;
   costPercentage?: number; // Percentage of costs over revenue
   is40RuleCompliant?: boolean; // Whether it meets the 40% rule
+  churnedUsers?: number;
+  newUsers?: number;
+  retainedUsers?: number;
+  cumulativeChurnRate?: number;
 }
 
 export interface EditableItemState {
   id: string | null;
   field: string | null;
 }
+
+// Unit economics metrics
+export interface UnitEconomics {
+  arpu: number; // Average Revenue Per User
+  cac: number; // Customer Acquisition Cost
+  ltv: number; // Lifetime Value
+  paybackPeriod: number; // Months to recover CAC
+  grossMargin: number; // Percentage
+  ltv2CacRatio: number; // LTV:CAC ratio
+}
+

@@ -41,6 +41,8 @@ interface CalculatorContextType {
   updatePaymentGatewayPercentage: (value: number) => void;
   updatePaymentGatewayFixed: (value: number) => void;
   updateTaxRate: (value: number) => void;
+  updateMonthlyChurnRate: (value: number) => void;
+  updateAcquisitionCostPerUser: (value: number) => void;
   setActiveTab: (
     tab: "subscriptions" | "costs" | "payment" | "taxes" | "projections"
   ) => void;
@@ -65,6 +67,8 @@ const initialState: CalculatorState = {
   paymentGatewayPercentage: 3.99,
   paymentGatewayFixed: 0.39,
   taxRate: 15.5,
+  monthlyChurnRate: 5,
+  acquisitionCostPerUser: 50,
   activeTab: "subscriptions",
 };
 
@@ -76,6 +80,10 @@ const initialResults: CalculationResults = {
   monthlyProfit: 0,
   monthlyTaxes: 0,
   monthlyGateway: 0,
+  customerLifetimeValue: 0,
+  customerAcquisitionCost: 0,
+  ltv2CacRatio: 0,
+  paybackPeriodMonths: 0,
 };
 
 const CalculatorContext = createContext<CalculatorContextType>({
@@ -106,6 +114,8 @@ const CalculatorContext = createContext<CalculatorContextType>({
   updatePaymentGatewayPercentage: () => {},
   updatePaymentGatewayFixed: () => {},
   updateTaxRate: () => {},
+  updateMonthlyChurnRate: () => {},
+  updateAcquisitionCostPerUser: () => {},
   setActiveTab: () => {},
 });
 
@@ -211,6 +221,19 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       ((avgGrossRevenuePerUser * state.paymentGatewayPercentage) / 100) *
         breakEvenUsers +
       state.paymentGatewayFixed * breakEvenUsers;
+    
+    const churnRateAsDecimal = state.monthlyChurnRate / 100;
+    const averageLifetimeMonths = churnRateAsDecimal > 0 ? 1 / churnRateAsDecimal : Infinity;
+    const customerLifetimeValue = avgNetRevenuePerUser * averageLifetimeMonths;
+    
+    const customerAcquisitionCost = state.acquisitionCostPerUser;
+    const ltv2CacRatio = customerAcquisitionCost > 0 ? customerLifetimeValue / customerAcquisitionCost : Infinity;
+    
+    const monthlyContributionMargin = avgNetRevenuePerUser - perUserVariableCosts;
+    const paybackPeriodMonths = monthlyContributionMargin > 0 
+      ? customerAcquisitionCost / monthlyContributionMargin 
+      : Infinity;
+    
     setResults({
       breakEvenUsers,
       workingCapital,
@@ -219,6 +242,10 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       monthlyProfit,
       monthlyTaxes,
       monthlyGateway,
+      customerLifetimeValue,
+      customerAcquisitionCost,
+      ltv2CacRatio,
+      paybackPeriodMonths
     });
   };
 
@@ -434,6 +461,14 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prev) => ({ ...prev, taxRate: value }));
   };
 
+  const updateMonthlyChurnRate = (value: number) => {
+    setState((prev) => ({ ...prev, monthlyChurnRate: value }));
+  };
+
+  const updateAcquisitionCostPerUser = (value: number) => {
+    setState((prev) => ({ ...prev, acquisitionCostPerUser: value }));
+  };
+
   const setActiveTab = (
     tab: "subscriptions" | "costs" | "payment" | "taxes" | "projections"
   ) => {
@@ -470,6 +505,8 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
         updatePaymentGatewayPercentage,
         updatePaymentGatewayFixed,
         updateTaxRate,
+        updateMonthlyChurnRate,
+        updateAcquisitionCostPerUser,
         setActiveTab,
       }}
     >
