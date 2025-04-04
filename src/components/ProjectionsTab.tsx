@@ -503,7 +503,7 @@ const ProjectionsTab: React.FC = () => {
           <div className="mb-8">
             <h3 className="text-lg font-medium mb-3">Métricas de Saúde do Negócio</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-app-dark border-app-border">
+              <Card className="bg-app-dark text-foreground border-app-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center justify-between">
                     <span>LTV:CAC</span>
