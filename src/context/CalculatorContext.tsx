@@ -51,19 +51,28 @@ interface CalculatorContextType {
 const initialState: CalculatorState = {
   dollarRate: 5.73,
   subscriptionPlans: [
-    { id: uuidv4(), name: "Basic Plan", price: 14.9, currency: "BRL", weight: 80 },
-    { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL", weight: 20 },
+    {
+      id: uuidv4(),
+      name: "Basic Plan",
+      price: 14.9,
+      currency: "BRL",
+      weight: 80,
+    },
+    {
+      id: uuidv4(),
+      name: "Premium Plan",
+      price: 34.9,
+      currency: "BRL",
+      weight: 20,
+    },
   ],
   monthlyCosts: [
-    { id: uuidv4(), name: "Hosting", value: 40, currency: "BRL" },
+    { id: uuidv4(), name: "Hosting", value: 10, currency: "USD" },
     { id: uuidv4(), name: "Database", value: 25, currency: "USD" },
-    { id: uuidv4(), name: "Ferramentas DEV", value: 50, currency: "USD" },
+    { id: uuidv4(), name: "Ferramentas DEV", value: 20, currency: "USD" },
     { id: uuidv4(), name: "Contador", value: 250, currency: "BRL" },
-    { id: uuidv4(), name: "Publicidade", value: 1500, currency: "BRL" },
   ],
-  annualCosts: [
-    { id: uuidv4(), name: "Domínio", value: 24.9, currency: "USD" },
-  ],
+  annualCosts: [{ id: uuidv4(), name: "Domínio", value: 40, currency: "BRL" }],
   perUserCosts: [{ id: uuidv4(), name: "OpenAI", value: 1, currency: "USD" }],
   paymentGatewayPercentage: 3.99,
   paymentGatewayFixed: 0.39,
@@ -163,7 +172,8 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
     if (totalWeight === 0) return 0;
 
     const weightedTotalRevenue = state.subscriptionPlans.reduce(
-      (sum, plan) => sum + normalizeAmount(plan.price, plan.currency) * (plan.weight || 1),
+      (sum, plan) =>
+        sum + normalizeAmount(plan.price, plan.currency) * (plan.weight || 1),
       0
     );
 
@@ -183,7 +193,9 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const performCalculations = () => {
     const avgGrossRevenuePerUser = calculateAverageRevenuePerUser();
-    const avgNetRevenuePerUser = calculateNetRevenuePerUser(avgGrossRevenuePerUser);
+    const avgNetRevenuePerUser = calculateNetRevenuePerUser(
+      avgGrossRevenuePerUser
+    );
 
     const perUserVariableCosts = state.perUserCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
@@ -222,19 +234,25 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       ((avgGrossRevenuePerUser * state.paymentGatewayPercentage) / 100) *
         breakEvenUsers +
       state.paymentGatewayFixed * breakEvenUsers;
-    
+
     const churnRateAsDecimal = state.monthlyChurnRate / 100;
-    const averageLifetimeMonths = churnRateAsDecimal > 0 ? 1 / churnRateAsDecimal : Infinity;
+    const averageLifetimeMonths =
+      churnRateAsDecimal > 0 ? 1 / churnRateAsDecimal : Infinity;
     const customerLifetimeValue = avgNetRevenuePerUser * averageLifetimeMonths;
-    
+
     const customerAcquisitionCost = state.acquisitionCostPerUser;
-    const ltv2CacRatio = customerAcquisitionCost > 0 ? customerLifetimeValue / customerAcquisitionCost : Infinity;
-    
-    const monthlyContributionMargin = avgNetRevenuePerUser - perUserVariableCosts;
-    const paybackPeriodMonths = monthlyContributionMargin > 0 
-      ? customerAcquisitionCost / monthlyContributionMargin 
-      : Infinity;
-    
+    const ltv2CacRatio =
+      customerAcquisitionCost > 0
+        ? customerLifetimeValue / customerAcquisitionCost
+        : Infinity;
+
+    const monthlyContributionMargin =
+      avgNetRevenuePerUser - perUserVariableCosts;
+    const paybackPeriodMonths =
+      monthlyContributionMargin > 0
+        ? customerAcquisitionCost / monthlyContributionMargin
+        : Infinity;
+
     setResults({
       breakEvenUsers,
       workingCapital,
@@ -246,7 +264,7 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({
       customerLifetimeValue,
       customerAcquisitionCost,
       ltv2CacRatio,
-      paybackPeriodMonths
+      paybackPeriodMonths,
     });
   };
 
