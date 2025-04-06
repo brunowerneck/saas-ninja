@@ -55,7 +55,7 @@ const initialState: CalculatorState = {
     { id: uuidv4(), name: "Premium Plan", price: 34.9, currency: "BRL", weight: 20 },
   ],
   monthlyCosts: [
-    { id: uuidv4(), name: "Hosting", value: 10, currency: "USD" },
+    { id: uuidv4(), name: "Hosting", value: 40, currency: "BRL" },
     { id: uuidv4(), name: "Database", value: 25, currency: "USD" },
     { id: uuidv4(), name: "Ferramentas DEV", value: 50, currency: "USD" },
     { id: uuidv4(), name: "Contador", value: 250, currency: "BRL" },
