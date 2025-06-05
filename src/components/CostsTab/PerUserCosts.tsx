@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
 import { Currency, EditableItemState } from "@/types/calculator";
 import EditableCell from "../EditableCell";
+import FormattedNumberInput from "../FormattedNumberInput";
 import { Dialog, DialogContent, DialogClose, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -18,15 +20,15 @@ export const PerUserCosts: React.FC = () => {
   } = useCalculator();
 
   const [newPerUserCostName, setNewPerUserCostName] = useState("");
-  const [newPerUserCostValue, setNewPerUserCostValue] = useState("");
+  const [newPerUserCostValue, setNewPerUserCostValue] = useState(0);
   const [newPerUserCostCurrency, setNewPerUserCostCurrency] = useState<Currency>("BRL");
   const [editingItem, setEditingItem] = useState<EditableItemState>({ id: null, field: null });
 
   const handleAddPerUserCost = () => {
-    if (newPerUserCostName && newPerUserCostValue) {
-      addPerUserCost(newPerUserCostName, parseFloat(newPerUserCostValue), newPerUserCostCurrency);
+    if (newPerUserCostName && newPerUserCostValue > 0) {
+      addPerUserCost(newPerUserCostName, newPerUserCostValue, newPerUserCostCurrency);
       setNewPerUserCostName("");
-      setNewPerUserCostValue("");
+      setNewPerUserCostValue(0);
     }
   };
 
@@ -42,7 +44,7 @@ export const PerUserCosts: React.FC = () => {
     <div className="mb-6">
       <h2 className="text-xl font-semibold mb-2">Custos Mensais Fixos Por Usuário</h2>
       <p className="text-white/60 text-sm mb-4">
-        Adicione custos que são aplicados para cada usuário. Estes custos serão deduzidos da mensalidade.
+        Adicione custos que são aplicados individualmente para cada usuário mensalmente.
       </p>
       <Table>
         <TableHeader>
@@ -142,14 +144,12 @@ export const PerUserCosts: React.FC = () => {
                 US$
               </option>
             </select>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={newPerUserCostValue}
-              onChange={(e) => setNewPerUserCostValue(e.target.value)}
+              onChange={setNewPerUserCostValue}
               className="form-input flex-1"
               placeholder="Valor"
-              step="0.01"
-              min="0"
+              min={0}
             />
           </div>
           <DialogFooter>

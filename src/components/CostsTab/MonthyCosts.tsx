@@ -4,6 +4,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
 import { Currency, EditableItemState } from "@/types/calculator";
 import EditableCell from "../EditableCell";
+import FormattedNumberInput from "../FormattedNumberInput";
 import {
   Dialog,
   DialogContent,
@@ -32,19 +33,19 @@ export const MonthyCosts: React.FC = () => {
   } = useCalculator();
   
   const [newMonthlyCostName, setNewMonthlyCostName] = useState("");
-  const [newMonthlyCostValue, setNewMonthlyCostValue] = useState("");
+  const [newMonthlyCostValue, setNewMonthlyCostValue] = useState(0);
   const [newMonthlyCostCurrency, setNewMonthlyCostCurrency] = useState<Currency>("BRL");
   const [editingItem, setEditingItem] = useState<EditableItemState>({ id: null, field: null });
 
   const handleAddMonthlyCost = () => {
-    if (newMonthlyCostName && newMonthlyCostValue) {
+    if (newMonthlyCostName && newMonthlyCostValue > 0) {
       addMonthlyCost(
         newMonthlyCostName,
-        parseFloat(newMonthlyCostValue),
+        newMonthlyCostValue,
         newMonthlyCostCurrency
       );
       setNewMonthlyCostName("");
-      setNewMonthlyCostValue("");
+      setNewMonthlyCostValue(0);
     }
   };
 
@@ -60,7 +61,7 @@ export const MonthyCosts: React.FC = () => {
     <div className="mb-6">
       <h2 className="text-xl font-semibold mb-2">Custos Mensais Fixos</h2>
       <p className="text-white/60 text-sm mb-4">
-        Adicione todos os custos fixos mensais do seu SaaS.
+        Adicione todos os custos fixos mensais do seu SaaS. Estes custos serão divididos entre todos os usuários.
       </p>
 
       <Table>
@@ -167,14 +168,12 @@ export const MonthyCosts: React.FC = () => {
                 US$
               </option>
             </select>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={newMonthlyCostValue}
-              onChange={(e) => setNewMonthlyCostValue(e.target.value)}
+              onChange={setNewMonthlyCostValue}
               className="form-input flex-1"
               placeholder="Valor"
-              step="0.01"
-              min="0"
+              min={0}
             />
           </div>
           <DialogFooter>

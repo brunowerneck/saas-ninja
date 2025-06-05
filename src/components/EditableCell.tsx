@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { Currency } from '@/types/calculator';
+import { formatNumberInput, parseNumberInput, formatNumberDisplay } from '@/utils/numberUtils';
 
 interface EditableCellProps {
   value: string | number;
@@ -24,7 +25,12 @@ const EditableCell: React.FC<EditableCellProps> = ({
   currencyValue,
   onCurrencyChange
 }) => {
-  const [editValue, setEditValue] = useState(value);
+  const [editValue, setEditValue] = useState(() => {
+    if (type === 'number' || type === 'currency') {
+      return formatNumberDisplay(Number(value));
+    }
+    return value;
+  });
   const [currency, setCurrency] = useState<Currency>(currencyValue || 'BRL');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,13 +53,28 @@ const EditableCell: React.FC<EditableCellProps> = ({
     if (onCurrencyChange && currencyValue !== currency) {
       onCurrencyChange(currency);
     }
-    onSave(editValue);
+    
+    if (type === 'number' || type === 'currency') {
+      onSave(parseNumberInput(String(editValue)));
+    } else {
+      onSave(editValue);
+    }
   };
 
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCurrency(e.target.value as Currency);
     if (onCurrencyChange) {
       onCurrencyChange(e.target.value as Currency);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    
+    if (type === 'number' || type === 'currency') {
+      setEditValue(formatNumberInput(newValue));
+    } else {
+      setEditValue(newValue);
     }
   };
 
@@ -71,12 +92,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
       )}
       <input
         ref={inputRef}
-        type={type === 'text' ? 'text' : 'number'}
+        type="text"
         value={editValue}
-        onChange={(e) => setEditValue(type === 'number' || type === 'currency' ? parseFloat(e.target.value) : e.target.value)}
+        onChange={handleInputChange}
         className="bg-app-dark border border-white/20 rounded px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-white/30"
-        min={min}
-        step={step}
         onKeyDown={handleKeyDown}
       />
       <div className="flex space-x-1">

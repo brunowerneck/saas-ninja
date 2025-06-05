@@ -4,6 +4,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import { useCalculator } from "@/context/CalculatorContext";
 import { Currency, EditableItemState } from "@/types/calculator";
 import EditableCell from "../EditableCell";
+import FormattedNumberInput from "../FormattedNumberInput";
 import {
   Dialog,
   DialogContent,
@@ -32,19 +33,19 @@ export const AnnualCosts: React.FC = () => {
   } = useCalculator();
   
   const [newAnnualCostName, setNewAnnualCostName] = useState("");
-  const [newAnnualCostValue, setNewAnnualCostValue] = useState("");
+  const [newAnnualCostValue, setNewAnnualCostValue] = useState(0);
   const [newAnnualCostCurrency, setNewAnnualCostCurrency] = useState<Currency>("BRL");
   const [editingItem, setEditingItem] = useState<EditableItemState>({ id: null, field: null });
 
   const handleAddAnnualCost = () => {
-    if (newAnnualCostName && newAnnualCostValue) {
+    if (newAnnualCostName && newAnnualCostValue > 0) {
       addAnnualCost(
         newAnnualCostName,
-        parseFloat(newAnnualCostValue),
+        newAnnualCostValue,
         newAnnualCostCurrency
       );
       setNewAnnualCostName("");
-      setNewAnnualCostValue("");
+      setNewAnnualCostValue(0);
     }
   };
 
@@ -60,7 +61,7 @@ export const AnnualCosts: React.FC = () => {
     <div className="mb-6">
       <h2 className="text-xl font-semibold mb-2">Custos Anuais Fixos</h2>
       <p className="text-white/60 text-sm mb-4">
-        Adicione todos os custos fixos anuais do seu SaaS.
+        Adicione todos os custos fixos anuais do seu SaaS. Estes custos serão divididos entre todos os usuários.
       </p>
       <Table>
         <TableHeader>
@@ -166,14 +167,12 @@ export const AnnualCosts: React.FC = () => {
                 US$
               </option>
             </select>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={newAnnualCostValue}
-              onChange={(e) => setNewAnnualCostValue(e.target.value)}
+              onChange={setNewAnnualCostValue}
               className="form-input flex-1"
               placeholder="Valor"
-              step="0.01"
-              min="0"
+              min={0}
             />
           </div>
           <DialogFooter>

@@ -125,8 +125,34 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return currency === "USD" ? amount * state.dollarRate : amount;
   };
 
-  const calculateMonthlyCosts = (userCount: number): number => {
+  const calculateFixedCostsPerUser = (userCount: number): number => {
+    if (userCount === 0) return 0;
+
+    // Custos mensais fixos divididos entre todos os usuários
     const fixedMonthlyCosts = state.monthlyCosts.reduce(
+      (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
+      0
+    );
+
+    // Custos anuais convertidos para mensal e divididos entre todos os usuários
+    const monthlyAnnualCosts = state.annualCosts.reduce(
+      (sum, cost) => sum + normalizeAmount(cost.value, cost.currency) / 12,
+      0
+    );
+
+    return (fixedMonthlyCosts + monthlyAnnualCosts) / userCount;
+  };
+
+  const calculatePerUserVariableCosts = (): number => {
+    // Custos por usuário são individuais (não divididos)
+    return state.perUserCosts.reduce(
+      (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
+      0
+    );
+  };
+
+  const calculateTotalMonthlyCosts = (userCount: number): number => {
+    const fixedCosts = state.monthlyCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
       0
     );
@@ -136,12 +162,9 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       0
     );
 
-    const totalPerUserCosts = state.perUserCosts.reduce(
-      (sum, cost) => sum + normalizeAmount(cost.value, cost.currency) * userCount,
-      0
-    );
+    const totalPerUserCosts = calculatePerUserVariableCosts() * userCount;
 
-    return fixedMonthlyCosts + monthlyAnnualCosts + totalPerUserCosts;
+    return fixedCosts + monthlyAnnualCosts + totalPerUserCosts;
   };
 
   const calculateAverageRevenuePerUser = (): number => {
@@ -169,30 +192,30 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const performCalculations = () => {
     const avgGrossRevenuePerUser = calculateAverageRevenuePerUser();
     const avgNetRevenuePerUser = calculateNetRevenuePerUser(avgGrossRevenuePerUser);
+    const perUserVariableCosts = calculatePerUserVariableCosts();
 
-    const perUserVariableCosts = state.perUserCosts.reduce(
+    // Custos fixos totais (não por usuário)
+    const totalFixedMonthlyCosts = state.monthlyCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
       0
     );
-
-    const fixedMonthlyCosts = state.monthlyCosts.reduce(
-      (sum, cost) => sum + normalizeAmount(cost.value, cost.currency),
-      0
-    );
-    const monthlyAnnualCosts = state.annualCosts.reduce(
+    const totalMonthlyAnnualCosts = state.annualCosts.reduce(
       (sum, cost) => sum + normalizeAmount(cost.value, cost.currency) / 12,
       0
     );
-    const totalFixedCosts = fixedMonthlyCosts + monthlyAnnualCosts;
+    const totalFixedCosts = totalFixedMonthlyCosts + totalMonthlyAnnualCosts;
 
+    // Cálculo do break-even: custos fixos divididos pela margem de contribuição por usuário
+    const contributionMarginPerUser = avgNetRevenuePerUser - perUserVariableCosts;
+    
     let breakEvenUsers = 0;
-    if (avgNetRevenuePerUser > perUserVariableCosts) {
-      breakEvenUsers = Math.ceil(totalFixedCosts / (avgNetRevenuePerUser - perUserVariableCosts));
+    if (contributionMarginPerUser > 0) {
+      breakEvenUsers = Math.ceil(totalFixedCosts / contributionMarginPerUser);
     } else {
       breakEvenUsers = Infinity;
     }
 
-    const monthlyTotalCosts = calculateMonthlyCosts(breakEvenUsers);
+    const monthlyTotalCosts = calculateTotalMonthlyCosts(breakEvenUsers);
     const workingCapital = monthlyTotalCosts * 3;
 
     const monthlyRevenue = breakEvenUsers * avgGrossRevenuePerUser;
@@ -209,9 +232,8 @@ export const CalculatorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const customerAcquisitionCost = state.acquisitionCostPerUser;
     const ltv2CacRatio = customerAcquisitionCost > 0 ? customerLifetimeValue / customerAcquisitionCost : Infinity;
 
-    const monthlyContributionMargin = avgNetRevenuePerUser - perUserVariableCosts;
     const paybackPeriodMonths =
-      monthlyContributionMargin > 0 ? customerAcquisitionCost / monthlyContributionMargin : Infinity;
+      contributionMarginPerUser > 0 ? customerAcquisitionCost / contributionMarginPerUser : Infinity;
 
     setResults({
       breakEvenUsers,
