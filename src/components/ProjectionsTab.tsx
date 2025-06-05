@@ -271,7 +271,15 @@ const ProjectionsTab: React.FC = () => {
 
   // Calculate macro analysis for specific user count
   const macroAnalysis = useMemo(() => {
-    return calculateProjectionPoint(macroUsers);
+    const baseAnalysis = calculateProjectionPoint(macroUsers);
+    const dividends = baseAnalysis.profit * 0.4; // 40% para dividendos
+    const investments = baseAnalysis.profit * 0.6; // 60% para investimentos
+    
+    return {
+      ...baseAnalysis,
+      dividends,
+      investments,
+    };
   }, [macroUsers, state, results]);
 
   const chartConfig = {
@@ -948,7 +956,7 @@ const ProjectionsTab: React.FC = () => {
 
           {/* 40% Rule Analysis - Dynamic Input */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-white">
               <AlertCircle className="h-5 w-5 text-amber-500" />
               <span>Regra dos 40% - Análise Dinâmica</span>
             </h3>
@@ -963,7 +971,7 @@ const ProjectionsTab: React.FC = () => {
             
             <Card className="bg-app-dark border-app-border">
               <CardHeader>
-                <CardTitle className="text-lg font-medium">
+                <CardTitle className="text-lg font-medium text-white">
                   Análise para Número Específico de Usuários
                 </CardTitle>
                 <CardDescription>
@@ -1019,14 +1027,14 @@ const ProjectionsTab: React.FC = () => {
 
           {/* Macro Analysis - Dynamic Input */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-white">
               <BarChart3 className="h-5 w-5 text-blue-500" />
               <span>Análise de Macros Financeiros</span>
             </h3>
             
             <Card className="bg-app-dark border-app-border">
               <CardHeader>
-                <CardTitle className="text-lg font-medium">
+                <CardTitle className="text-lg font-medium text-white">
                   Análise Financeira por Número de Usuários
                 </CardTitle>
                 <CardDescription>
@@ -1071,6 +1079,25 @@ const ProjectionsTab: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Divisão do Lucro */}
+                {macroAnalysis.profit > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                    <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                      <div className="text-sm text-white/80 mb-1">Dividendos (40%)</div>
+                      <div className="text-xl font-bold text-yellow-400">
+                        {formatCurrency(macroAnalysis.dividends)}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                      <div className="text-sm text-white/80 mb-1">Investimentos (60%)</div>
+                      <div className="text-xl font-bold text-blue-400">
+                        {formatCurrency(macroAnalysis.investments)}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
