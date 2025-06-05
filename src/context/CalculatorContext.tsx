@@ -36,7 +36,7 @@ interface CalculatorContextType {
 }
 
 const initialState: CalculatorState = {
-  dollarRate: 5.73,
+  dollarRate: 5.70,
   subscriptionPlans: [
     {
       id: uuidv4(),
@@ -47,24 +47,20 @@ const initialState: CalculatorState = {
     },
   ],
   monthlyCosts: [
-    { id: uuidv4(), name: "Hosting", value: 10, currency: "USD" },
-    { id: uuidv4(), name: "Database", value: 25, currency: "USD" },
-    { id: uuidv4(), name: "Ferramentas DEV", value: 25, currency: "USD" },
+    { id: uuidv4(), name: "Ferramentas DEV", value: 35, currency: "USD" },
     { id: uuidv4(), name: "Contador", value: 350, currency: "BRL" },
   ],
   annualCosts: [
-    { id: uuidv4(), name: "Domínio", value: 40, currency: "BRL" },
-    { id: uuidv4(), name: "MS 365", value: 365, currency: "BRL" },
+    { id: uuidv4(), name: "Domínio", value: 160, currency: "BRL" },
   ],
   perUserCosts: [
-    { id: uuidv4(), name: "OpenAI", value: 1, currency: "USD" },
-    { id: uuidv4(), name: "NF-e", value: 0.49, currency: "BRL" },
+    { id: uuidv4(), name: "VPS", value: 149, currency: "BRL" },
   ],
-  paymentGatewayPercentage: 2.99,
-  paymentGatewayFixed: 0.39,
+  paymentGatewayPercentage: 3.99,
+  paymentGatewayFixed: 0.49,
   taxRate: 15.5,
-  monthlyChurnRate: 5,
-  acquisitionCostPerUser: 50,
+  monthlyChurnRate: 8.3,
+  acquisitionCostPerUser: 300,
   activeTab: "subscriptions",
 };
 

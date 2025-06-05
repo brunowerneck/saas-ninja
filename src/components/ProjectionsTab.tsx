@@ -54,8 +54,8 @@ const ProjectionsTab: React.FC = () => {
     updateMonthlyChurnRate,
     updateAcquisitionCostPerUser,
   } = useCalculator();
-  const [growthRate, setGrowthRate] = useState<number>(15);
-  const [initialUsers, setInitialUsers] = useState<number>(30);
+  const [growthRate, setGrowthRate] = useState<number>(50);
+  const [initialUsers, setInitialUsers] = useState<number>(2);
   const [projectionTab, setProjectionTab] = useState<string>("time");
   const [fortyPercentUsers, setFortyPercentUsers] = useState<number>(1000);
   const [macroUsers, setMacroUsers] = useState<number>(1000);
