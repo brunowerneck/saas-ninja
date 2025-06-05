@@ -45,6 +45,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 const ProjectionsTab: React.FC = () => {
   const {
@@ -56,6 +57,8 @@ const ProjectionsTab: React.FC = () => {
   const [growthRate, setGrowthRate] = useState<number>(15);
   const [initialUsers, setInitialUsers] = useState<number>(30);
   const [projectionTab, setProjectionTab] = useState<string>("time");
+  const [fortyPercentUsers, setFortyPercentUsers] = useState<number>(1000);
+  const [macroUsers, setMacroUsers] = useState<number>(1000);
 
   // Unit economics calculation
   const unitEconomics: UnitEconomics = useMemo(() => {
@@ -251,21 +254,25 @@ const ProjectionsTab: React.FC = () => {
     };
   }
 
-  // Calculate the 40% rule benchmark for each milestone
+  // Calculate the 40% rule analysis for specific user count
   const fortyPercentRuleAnalysis = useMemo(() => {
-    return projections.milestonePoints.map((point) => {
-      const annualRevenue = point.revenue * 12;
-      const costPercentage = (point.costs / point.revenue) * 100;
-      const isCompliant = costPercentage <= 40;
+    const point = calculateProjectionPoint(fortyPercentUsers);
+    const annualRevenue = point.revenue * 12;
+    const costPercentage = point.revenue > 0 ? (point.costs / point.revenue) * 100 : 0;
+    const isCompliant = costPercentage <= 40;
 
-      return {
-        users: point.users,
-        annualRevenue,
-        costPercentage,
-        isCompliant,
-      };
-    });
-  }, [projections.milestonePoints]);
+    return {
+      users: fortyPercentUsers,
+      annualRevenue,
+      costPercentage,
+      isCompliant,
+    };
+  }, [fortyPercentUsers, state, results]);
+
+  // Calculate macro analysis for specific user count
+  const macroAnalysis = useMemo(() => {
+    return calculateProjectionPoint(macroUsers);
+  }, [macroUsers, state, results]);
 
   const chartConfig = {
     revenue: {
@@ -939,11 +946,11 @@ const ProjectionsTab: React.FC = () => {
             </TabsContent>
           </Tabs>
 
-          {/* 40% Rule Analysis */}
+          {/* 40% Rule Analysis - Dynamic Input */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-500" />
-              <span>Regra dos 40% - Análise</span>
+              <span>Regra dos 40% - Análise Dinâmica</span>
             </h3>
             <div className="bg-app-dark/50 p-4 rounded-lg mb-4">
               <p className="text-sm text-white/80">
@@ -953,74 +960,119 @@ const ProjectionsTab: React.FC = () => {
                 seus custos totais abaixo de 40% de sua receita.
               </p>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assinantes</TableHead>
-                  <TableHead>Receita Anual</TableHead>
-                  <TableHead>Custos (% da Receita)</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fortyPercentRuleAnalysis.map((point, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{point.users}</TableCell>
-                    <TableCell>{formatCurrency(point.annualRevenue)}</TableCell>
-                    <TableCell>{point.costPercentage.toFixed(1)}%</TableCell>
-                    <TableCell>
-                      <div
-                        className={`flex items-center gap-1 ${
-                          point.isCompliant ? "text-success" : "text-red-500"
-                        }`}
-                      >
-                        {point.isCompliant ? (
-                          <>
-                            <div className="h-2 w-2 rounded-full bg-success"></div>
-                            <span>Saudável</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                            <span>Acima do recomendado</span>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            
+            <Card className="bg-app-dark border-app-border">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">
+                  Análise para Número Específico de Usuários
+                </CardTitle>
+                <CardDescription>
+                  Digite o número de usuários para ver a análise da regra dos 40%
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="fortyPercentUsers" className="block text-sm font-medium mb-2">
+                    Número de usuários
+                  </Label>
+                  <FormattedNumberInput
+                    value={fortyPercentUsers}
+                    onChange={setFortyPercentUsers}
+                    className="max-w-xs text-white bg-app-card border border-white/20 rounded px-3 py-2"
+                    placeholder="1000"
+                    min={1}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Receita Anual</div>
+                    <div className="text-xl font-bold text-white">
+                      {formatCurrency(fortyPercentRuleAnalysis.annualRevenue)}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Custos (% da Receita)</div>
+                    <div className="text-xl font-bold text-white">
+                      {fortyPercentRuleAnalysis.costPercentage.toFixed(1)}%
+                    </div>
+                  </div>
+                  
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Status</div>
+                    <div className={`flex items-center gap-2 ${
+                      fortyPercentRuleAnalysis.isCompliant ? "text-success" : "text-red-500"
+                    }`}>
+                      <div className={`h-2 w-2 rounded-full ${
+                        fortyPercentRuleAnalysis.isCompliant ? "bg-success" : "bg-red-500"
+                      }`}></div>
+                      <span className="text-lg font-medium">
+                        {fortyPercentRuleAnalysis.isCompliant ? "Saudável" : "Acima do recomendado"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
+          {/* Macro Analysis - Dynamic Input */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Tabela de Marcos</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assinantes</TableHead>
-                  <TableHead>Receita Mensal</TableHead>
-                  <TableHead>Custos Mensais</TableHead>
-                  <TableHead>Lucro Mensal</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projections.milestonePoints.map((point, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{point.users}</TableCell>
-                    <TableCell>{formatCurrency(point.revenue)}</TableCell>
-                    <TableCell>{formatCurrency(point.costs)}</TableCell>
-                    <TableCell
-                      className={
-                        point.profit >= 0 ? "text-success" : "text-red-500"
-                      }
-                    >
-                      {formatCurrency(point.profit)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+              <span>Análise de Macros Financeiros</span>
+            </h3>
+            
+            <Card className="bg-app-dark border-app-border">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">
+                  Análise Financeira por Número de Usuários
+                </CardTitle>
+                <CardDescription>
+                  Digite o número de usuários para ver os macros financeiros mensais
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="macroUsers" className="block text-sm font-medium mb-2">
+                    Número de usuários
+                  </Label>
+                  <FormattedNumberInput
+                    value={macroUsers}
+                    onChange={setMacroUsers}
+                    className="max-w-xs text-white bg-app-card border border-white/20 rounded px-3 py-2"
+                    placeholder="1000"
+                    min={1}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Receita Mensal</div>
+                    <div className="text-xl font-bold text-success">
+                      {formatCurrency(macroAnalysis.revenue)}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Custos Mensais</div>
+                    <div className="text-xl font-bold text-red-400">
+                      {formatCurrency(macroAnalysis.costs)}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-app-card p-4 rounded-lg border border-app-border">
+                    <div className="text-sm text-white/80 mb-1">Lucro Mensal</div>
+                    <div className={`text-xl font-bold ${
+                      macroAnalysis.profit >= 0 ? "text-success" : "text-red-500"
+                    }`}>
+                      {formatCurrency(macroAnalysis.profit)}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </>
       ) : (
